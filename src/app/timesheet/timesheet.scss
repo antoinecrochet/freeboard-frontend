@@ -1,0 +1,21 @@
+.timesheet-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.full-width {
+  width: 100%;
+  text-align: center;
+}
+
+.hours-input {
+  width: 60px;
+  text-align: center;
+}
