@@ -40,7 +40,7 @@ const initializeApp = async () => {
         features: [
           withAutoRefreshToken({
             onInactivityTimeout: 'logout',
-            sessionTimeout: 60000
+            sessionTimeout: 600000 // 10 minutes
           })
         ],
         providers: [
@@ -54,8 +54,8 @@ const initializeApp = async () => {
       }),
       provideZoneChangeDetection({ eventCoalescing: true }),
       provideRouter(routes),
-      provideAnimations(),              // ✅ animations support
-      provideNativeDateAdapter(),       // ✅ date adapter for Material
+      provideAnimations(),
+      provideNativeDateAdapter(),
       provideHttpClient(withInterceptors([includeBearerTokenInterceptor]))
     ]
   };
@@ -66,37 +66,3 @@ const initializeApp = async () => {
 initializeApp().catch((error) =>
   console.error(`Failed to initialize the application. ${error.message || error}`)
 );
-
-
-
-// bootstrapApplication(App, {
-//   providers: [
-//     provideHttpClient(),
-//     provideRouter(routes),
-//     provideKeycloak({
-//       config: {
-//         url: environment.keycloak.config.url,
-//         realm: environment.keycloak.config.realm,
-//         clientId: environment.keycloak.config.clientId
-//       },
-//       initOptions: {
-//         onLoad: environment.keycloak.initOptions.onLoad as KeycloakOnLoad,
-//         checkLoginIframe: environment.keycloak.initOptions.checkLoginIframe
-//       },
-//       features: [
-//         withAutoRefreshToken({
-//           onInactivityTimeout: 'logout',
-//           sessionTimeout: 60000
-//         })
-//       ],
-//       providers: [
-//         AutoRefreshTokenService,
-//         UserActivityService,
-//         {
-//           provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-//           useValue: [localhostCondition]
-//         }
-//       ]
-//     }),
-//   ],
-// }).catch((err) => console.error(err));

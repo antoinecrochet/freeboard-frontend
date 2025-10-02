@@ -10,5 +10,6 @@ export const environment = {
             onLoad: 'login-required',
             checkLoginIframe: false
         }
-    }
+    },
+    apiBaseUrl: 'http://localhost:8080'
 };

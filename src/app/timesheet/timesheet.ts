@@ -1,20 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, format } from 'date-fns';
-
-interface TimeSheetResponse {
-  id: number;
-  day: string;
-  hours: number;
-}
+import { addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, format, isWeekend } from 'date-fns';
+import { TimesheetService, TimeSheetResponse } from '../services/timesheet.service';
 
 @Component({
   selector: 'app-timesheet',
@@ -22,7 +15,6 @@ interface TimeSheetResponse {
   imports: [
     CommonModule,
     FormsModule,
-    HttpClientModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
@@ -34,10 +26,12 @@ interface TimeSheetResponse {
 })
 export class Timesheet {
   currentMonth: Date = new Date();
+  todayStr: string = format(new Date(), 'yyyy-MM-dd');
   weeks: any[] = [];
-  weekDays: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  weekDays: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  holidays: string[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private timesheetService: TimesheetService) { }
 
   ngOnInit() {
     this.loadMonth();
@@ -51,8 +45,11 @@ export class Timesheet {
   loadMonth() {
     const from = format(startOfMonth(this.currentMonth), 'yyyy-MM-dd');
     const to = format(endOfMonth(this.currentMonth), 'yyyy-MM-dd');
-    this.http.get<{ timesheets: TimeSheetResponse[] }>(`/api/timesheets?from=${from}&to=${to}`)
-      .subscribe(res => this.buildWeeks(res.timesheets));
+
+    this.timesheetService.getTimeSheets(from, to).subscribe({
+      next: (res) => this.buildWeeks(res.timesheets),
+      error: (err) => console.error('Failed to load timesheets', err)
+    });
   }
 
   buildWeeks(entries: TimeSheetResponse[]) {
@@ -62,24 +59,38 @@ export class Timesheet {
     let current = start;
 
     while (current <= end) {
-      let week: any = {};
+      let week: any[] = [];
+
       for (let i = 0; i < 7; i++) {
         const dayStr = format(current, 'yyyy-MM-dd');
         const entry = entries.find(e => e.day === dayStr);
-        week[this.weekDays[i]] = { date: dayStr, id: entry?.id, hours: entry?.hours ?? 0 };
+        console.log(dayStr)
+        week.push({
+          date: dayStr,
+          id: entry?.id ?? null,
+          hours: entry?.hours ?? 0,
+          isWeekend: isWeekend(current),
+          isHoliday: this.holidays.includes(dayStr),
+          dayName: this.weekDays[i],
+          dayNumber: format(current, 'dd'),
+          disabled: current.getMonth() !== this.currentMonth.getMonth()
+        });
+
         current = addDays(current, 1);
       }
+
       weeks.push(week);
     }
+
     this.weeks = weeks;
   }
 
   updateHours(entry: any) {
     if (entry.id) {
-      this.http.patch(`/api/timesheets/${entry.id}`, { hours: entry.hours }).subscribe();
+      this.timesheetService.updateTimeSheet(entry.id, entry.hours).subscribe();
     } else if (entry.hours > 0) {
-      this.http.post(`/api/timesheets`, { day: entry.date, hours: entry.hours })
-        .subscribe((res: any) => entry.id = res.id);
+      this.timesheetService.createTimeSheet(entry.date, entry.hours)
+        .subscribe((createdTimeSheetId) => entry.id = createdTimeSheetId);
     }
   }
 }
