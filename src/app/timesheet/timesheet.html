@@ -6,9 +6,14 @@
   <button mat-icon-button (click)="changeMonth(1)">
     <mat-icon>chevron_right</mat-icon>
   </button>
+
+  <mat-button-toggle-group [(ngModel)]="entryMode" class="mode-toggle">
+    <mat-button-toggle value="checkbox">Journée</mat-button-toggle>
+    <mat-button-toggle value="hours">Heures</mat-button-toggle>
+  </mat-button-toggle-group>
 </div>
 
-<table class="timesheet-table mat-elevation-z2">
+<table class="calendar-table">
   <thead>
     <tr>
       <th *ngFor="let day of weekDays">{{ day }}</th>
@@ -16,13 +21,29 @@
   </thead>
   <tbody>
     <tr *ngFor="let week of weeks">
-      <td *ngFor="let day of week"
-        [ngClass]="{'weekend': day.isWeekend || day.isHoliday, 'disabled': day.disabled, 'today': day.date === todayStr}">
-        <div class="day-header">{{ day.dayName }} {{ day.dayNumber }}</div>
-        <mat-form-field appearance="outline" class="hours-input">
-          <input matInput type="number" [(ngModel)]="day.hours" (blur)="updateHours(day)" min="0" max="24"
-            [disabled]="day.disabled">
-        </mat-form-field>
+      <td *ngFor="let entry of week" [class.weekend]="entry.isWeekend" [class.holiday]="entry.isHoliday"
+        [class.checked]="entry.hours > 0" [class.disabled]="entry.disabled">
+
+        <!-- Mode input -->
+        @if (entryMode === 'hours') {
+        <ng-container>
+          <input type="number" [(ngModel)]="entry.hours" [disabled]="entry.disabled" (blur)="updateHours(entry)" min="0"
+            max="24">
+        </ng-container>
+        }
+
+        <!-- Mode checkbox -->
+        @if (entryMode === 'checkbox') {
+        <ng-container>
+          <mat-checkbox [checked]="entry.hours > 0" [disabled]="entry.disabled"
+            (change)="toggleDay(entry, $event.checked)">
+          </mat-checkbox>
+          @if (entry.hours > 0 && entry.hours < 8) { <div class="partial-day">({{ entry.hours }}h)</div>
+            }
+        </ng-container>
+
+        }
+        <div class="day-label">{{ entry.dayNumber }}</div>
       </td>
     </tr>
   </tbody>

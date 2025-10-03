@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, format, isWeekend } from 'date-fns';
 import { TimesheetService, TimeSheetResponse } from '../services/timesheet.service';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-timesheet',
@@ -18,8 +20,10 @@ import { TimesheetService, TimeSheetResponse } from '../services/timesheet.servi
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
+    MatButtonToggleModule,
+    MatCheckboxModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './timesheet.html',
   styleUrls: ['./timesheet.scss']
@@ -30,6 +34,7 @@ export class Timesheet {
   weeks: any[] = [];
   weekDays: string[] = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   holidays: string[] = [];
+  entryMode: 'hours' | 'checkbox' = 'checkbox';
 
   constructor(private timesheetService: TimesheetService) { }
 
@@ -64,7 +69,6 @@ export class Timesheet {
       for (let i = 0; i < 7; i++) {
         const dayStr = format(current, 'yyyy-MM-dd');
         const entry = entries.find(e => e.day === dayStr);
-        console.log(dayStr)
         week.push({
           date: dayStr,
           id: entry?.id ?? null,
@@ -87,10 +91,19 @@ export class Timesheet {
 
   updateHours(entry: any) {
     if (entry.id) {
+      if (entry.hours === 0) {
+        this.timesheetService.deleteTimeSheet(entry.id).subscribe(() => entry.id = null);
+        return;
+      }
       this.timesheetService.updateTimeSheet(entry.id, entry.hours).subscribe();
     } else if (entry.hours > 0) {
       this.timesheetService.createTimeSheet(entry.date, entry.hours)
         .subscribe((createdTimeSheetId) => entry.id = createdTimeSheetId);
     }
+  }
+
+  toggleDay(entry: any, checked: boolean) {
+    entry.hours = checked ? 8 : 0;
+    this.updateHours(entry);
   }
 }
