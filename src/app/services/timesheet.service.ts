@@ -35,7 +35,6 @@ export class TimesheetService {
             .pipe(
                 map(response => {
                     const location = response.headers.get('Location');
-                    console.log(response.headers)
                     if (!location) {
                         throw new Error('Location header missing');
                     }

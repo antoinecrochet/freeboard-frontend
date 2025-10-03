@@ -21,13 +21,14 @@
   </thead>
   <tbody>
     <tr *ngFor="let week of weeks">
-      <td *ngFor="let entry of week" [class.weekend]="entry.isWeekend" [class.holiday]="entry.isHoliday"
-        [class.checked]="entry.hours > 0" [class.disabled]="entry.disabled">
+      <td *ngFor="let entry of week" [class.weekend]="entry.isWeekend && entry.hours === 0"
+        [class.holiday]="entry.isHoliday && entry.hours === 0" [class.checked]="entry.hours > 0"
+        [class.disabled]="entry.disabled">
 
         <!-- Mode input -->
         @if (entryMode === 'hours') {
         <ng-container>
-          <input type="number" [(ngModel)]="entry.hours" [disabled]="entry.disabled" (blur)="updateHours(entry)" min="0"
+          <input type="number" [(ngModel)]="entry.hours" [disabled]="entry.disabled" (change)="updateHours(entry)" min="0"
             max="24">
         </ng-container>
         }

@@ -8,9 +8,8 @@ import Keycloak from 'keycloak-js';
   styleUrl: './home.scss',
 })
 export class Home {
-
   private readonly keycloak = inject(Keycloak);
 
   isLoggedIn = this.keycloak.authenticated ?? false;
-  username = this.keycloak.tokenParsed?.['preferred_username'] ?? '';
+  fullName = this.keycloak.tokenParsed?.['name'] ?? '';
 }

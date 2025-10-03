@@ -1,4 +1,4 @@
-$primary: #1976d2;
+$primary: #d7e3ff;
 $primary-hover: #1565c0;
 $background: #fafafa;
 $sidebar-bg: #fff;
@@ -7,7 +7,7 @@ $divider: #e0e0e0;
 
 .layout-topbar {
   background: $primary;
-  color: white;
+  color: #005cbb;
   height: 64px;
   padding: 0 24px;
   display: flex;
@@ -34,7 +34,7 @@ $divider: #e0e0e0;
   align-items: center;
   gap: 8px;
   text-transform: none;
-  color: white;
+  color: #005cbb !important;
   font-weight: 500;
   border-radius: 6px;
   padding: 6px 10px;
